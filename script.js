@@ -11,23 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
         "xy": "ئ", "xx": "ء", "xi": "إ", "xa": "أ", "ai": "ع", "aa": "آ",
         "q": "ق", "f": "ف", "h": "ه", "j": "ج", "d": "د", "s": "س",
         "y": "ي", "b": "ب", "l": "ل", "a": "ا", "t": "ت", "n": "ن",
-        "m": "م", "k": "ك", "r": "ر", "e": "ى", "w": "و", "z": "ز"
+        "m": "م", "k": "ك", "r": "ر", "e": "ى", "w": "و", "z": "ز",
+        // Harakat (音符) 代表符號
+        '^': 'َ', '_': 'ِ', '~': 'ُ', '°': 'ْ', '#': 'ّ',
+        '^^': 'ً', '__': 'ٍ', '~~': 'ٌ',
     };
     
-    // 3. Harakat (音符) 對應規則
-    // 單次按鍵
-    const singlePressHarakatMap = {
-        'A': 'َ', // Fatha
-        'I': 'ِ', // Kasra
-        'U': 'ُ', // Damma
-        'O': 'ْ', // Sukun (Shift+O)
-        'W': 'ّ', // Shadda (Shift+W)
-    };
-    // 連續按兩下
-    const doublePressHarakatMap = {
-        'A': 'ً', // Fathatan (Shift+A+A)
-        'I': 'ٍ', // Kasratan (Shift+I+I)
-        'U': 'ٌ', // Dammatan (Shift+U+U)
+    // 3. Harakat 輸入邏輯對應表
+    const harakatSymbolMap = {
+        'A': '^', 'I': '_', 'U': '~', 'O': '°', 'W': '#'
     };
 
     // 4. 狀態變數
@@ -35,18 +27,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const candidatePrefixes = ['`', 'x'];
     let activeCandidates = [];
     let composition = { text: '', startIndex: -1 };
-    
-    // 用於偵測連續按鍵的狀態
     let lastShiftKeyPress = { key: null, time: 0 };
-    const doublePressThreshold = 300; // 300 毫秒內算連續按
+    const doublePressThreshold = 300; 
 
-    // 5. 核心函式 (這部分不變)
-    function updateConversion() { /* ... (此函式內容與之前完全相同) ... */ }
-    function showCandidates(candidates) { /* ... (此函式內容與之前完全相同) ... */ }
-    function hideCandidates() { /* ... (此函式內容與之前完全相同) ... */ }
-    function commitCandidate(selectedKey) { /* ... (此函式內容與之前完全相同) ... */ }
+    // 5. 核心函式
+    function insertAtCursor(field, textToInsert) {
+        const startPos = field.selectionStart;
+        const endPos = field.selectionEnd;
+        field.value = field.value.substring(0, startPos) + textToInsert + field.value.substring(endPos, field.value.length);
+        field.selectionStart = field.selectionEnd = startPos + textToInsert.length;
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+    }
 
-    // --- 為了方便複製貼上，我將未變動的函式也完整包含進來 ---
+    function replaceAtCursor(field, textToReplace, textToInsert) {
+        const startPos = field.selectionStart;
+        const currentPos = startPos - textToReplace.length;
+        if (currentPos < 0) return; // 安全檢查
+        field.value = field.value.substring(0, currentPos) + textToInsert + field.value.substring(startPos, field.value.length);
+        field.selectionStart = field.selectionEnd = currentPos + textToInsert.length;
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
     function updateConversion() {
         const text = latinInput.value;
         let arabicResult = '';
@@ -87,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hideCandidates();
         }
     }
+    
     function showCandidates(candidates) {
         if (candidates.length === 0) { hideCandidates(); return; }
         candidateWindow.innerHTML = candidates.map((key, index) => 
@@ -94,11 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
         ).join('');
         candidateWindow.classList.remove('hidden');
     }
+
     function hideCandidates() {
         candidateWindow.classList.add('hidden');
         activeCandidates = [];
         composition = { text: '', startIndex: -1 };
     }
+
     function commitCandidate(selectedKey) {
         const text = latinInput.value;
         const pretext = text.substring(0, composition.startIndex);
@@ -110,47 +114,35 @@ document.addEventListener('DOMContentLoaded', () => {
         latinInput.selectionStart = latinInput.selectionEnd = (pretext + selectedKey + ' ').length;
     }
 
-
     // 6. 事件監聽
     latinInput.addEventListener('input', updateConversion);
     
-    // [重大更新] 全新的 keydown 事件監聽器，包含連續按鍵邏輯
+    // [已修正] 確保只有一個 keydown 事件監聽器
     latinInput.addEventListener('keydown', (e) => {
-        // --- Harakat 邏輯 ---
         if (e.shiftKey) {
             const key = e.key.toUpperCase();
             const currentTime = Date.now();
+            const symbol = harakatSymbolMap[key];
 
-            // 檢查是否為連續按鍵 (例如 Shift+A+A)
-            if (
-                lastShiftKeyPress.key === key &&
-                (currentTime - lastShiftKeyPress.time < doublePressThreshold) &&
-                doublePressHarakatMap[key]
-            ) {
+            if (symbol) {
                 e.preventDefault();
-                // 替換掉前一個單音符，換成雙音符 (Tanwin)
-                arabicOutput.value = arabicOutput.value.slice(0, -1) + doublePressHarakatMap[key];
-                // 重置狀態，避免第三次觸發
-                lastShiftKeyPress = { key: null, time: 0 };
-                return;
-            }
-
-            // 檢查是否為單次按鍵
-            if (singlePressHarakatMap[key]) {
-                e.preventDefault();
-                arabicOutput.value += singlePressHarakatMap[key];
-                // 記錄這次按鍵，為下一次可能的連續按鍵做準備
-                lastShiftKeyPress = { key: key, time: currentTime };
+                // 檢查是否為連續按鍵
+                if (lastShiftKeyPress.key === key && (currentTime - lastShiftKeyPress.time < doublePressThreshold)) {
+                    replaceAtCursor(latinInput, symbol, symbol + symbol);
+                    lastShiftKeyPress = { key: null, time: 0 };
+                } else {
+                    insertAtCursor(latinInput, symbol);
+                    lastShiftKeyPress = { key: key, time: currentTime };
+                }
                 return;
             }
         }
         
-        // 如果按下的不是 Shift 相關功能鍵，就重置連續按鍵的狀態
         if (!e.shiftKey) {
             lastShiftKeyPress = { key: null, time: 0 };
         }
 
-        // --- 候選字視窗邏輯 (不變) ---
+        // 候選字視窗邏輯
         if (activeCandidates.length > 0) {
             const keyNum = parseInt(e.key);
             if (keyNum >= 1 && keyNum <= activeCandidates.length) {
@@ -168,10 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    candidateWindow.addEventListener('mousedown', (e) => { /* ... (此函式內容與之前完全相同) ... */ });
-    function populateCharMap() { /* ... (此函式內容與之前完全相同) ... */ }
-    
-    // --- 同樣為了方便，將未變動的函式也完整包含進來 ---
     candidateWindow.addEventListener('mousedown', (e) => {
         const item = e.target.closest('.candidate-item');
         if (item) {
@@ -180,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 表格生成邏輯
     const toggleBtn = document.getElementById('toggle-map-btn');
     const mapContainer = document.getElementById('map-container');
     const mapTableBody = document.querySelector('#char-map-table tbody');
@@ -198,8 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
             mapTableBody.appendChild(row);
         }
     }
+
     toggleBtn.addEventListener('click', () => {
         mapContainer.classList.toggle('hidden');
     });
+
     populateCharMap();
 });
