@@ -9,7 +9,7 @@
 <body>
 
     <div class="container">
-        <h1>أداة الكتابة العربية بالحروف اللاتينية</h1>
+        <h1>أداة الكتابة العربية بالحروف اللاتينية </h1>
         <p>اكتب باللاتينية في الصندوق الأيسر. استخدم ` أو x لإظهار قائمة الاختيارات.</p>
         <p>Type in Latin. Use '`' or 'x' prefixes to bring up the candidate list.</p>
         
@@ -17,7 +17,7 @@
             <div class="editor">
                 <label for="latin-input">المدخلات اللاتينية (Latin Input)</label>
                 <div class="input-wrapper">
-                    <textarea id="latin-input" placeholder="e.g., vhmd..."></textarea>
+                    <textarea id="latin-input" placeholder="e.g., `hmd..."></textarea>
                     <div id="candidate-window" class="hidden"></div>
                 </div>
             </div>
@@ -26,6 +26,23 @@
                 <textarea id="arabic-output" readonly placeholder="مخرجات عربية..."></textarea>
             </div>
         </div>
+
+        <div class="map-section">
+            <button id="toggle-map-btn">إظهار/إخفاء جدول الأحرف (Show/Hide Character Map)</button>
+            <div id="map-container" class="hidden">
+                <table id="char-map-table">
+                    <thead>
+                        <tr>
+                            <th>الحرف اللاتيني (Latin)</th>
+                            <th>الحرف العربي (Arabic)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script src="script.js"></script>

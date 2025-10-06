@@ -114,3 +114,70 @@ textarea {
     font-size: 1.2rem;
     margin: 0 5px;
 }
+/* --- Character Map Styles --- */
+.map-section {
+    margin-top: 30px;
+    text-align: center;
+}
+
+#toggle-map-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    transition: background-color 0.2s;
+}
+
+#toggle-map-btn:hover {
+    background-color: #5a6268;
+}
+
+#map-container {
+    max-height: 400px;
+    overflow-y: auto; /* Add scroll if content is too tall */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+#map-container.hidden {
+    display: none;
+}
+
+#char-map-table {
+    width: 100%;
+    border-collapse: collapse; /* Make borders clean */
+}
+
+#char-map-table th, #char-map-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+#char-map-table thead th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    position: sticky; /* Make header stick on scroll */
+    top: 0;
+}
+
+#char-map-table tbody tr:last-child td {
+    border-bottom: none; /* Remove border for the last row */
+}
+
+#char-map-table td:first-child {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    font-size: 1.1rem;
+    direction: ltr;
+}
+
+#char-map-table td:last-child {
+    font-family: 'Noto Sans Arabic', 'Tahoma', sans-serif;
+    font-size: 1.5rem;
+}

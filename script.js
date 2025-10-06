@@ -4,42 +4,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const arabicOutput = document.getElementById('arabic-output');
     const candidateWindow = document.getElementById('candidate-window');
 
-    // 2. 根據你提供的 CSV 檔案建立的對應規則
-    // 鍵的順序很重要，長度較長的鍵（如 'vdh'）必須在較短的鍵（如 'vd'）之前，以確保優先匹配。
-    // [已修改] 將所有 'v' 前綴替換為 '`'
+    // 2. 根據你提供的 CSV 檔案建立的對應規則 (已將 'v' 替換為 '`')
     const translitMap = {
-        "`dh": "ظ", // vdh -> `dh
-        "kh": "خ", "sh": "ش", "dh": "ذ", "gh": "غ", 
-        "`h": "ح",  // vh  -> `h
-        "xs": "ص", "th": "ث", 
-        "`t": "ط",  // vt  -> `t
-        "`d": "ض",  // vd  -> `d
-        "`a": "ة",  // va  -> `a
-        "xw": "ؤ", "xy": "ئ", "xx": "ء", "xi": "إ", "xa": "أ", "ai": "ع", "aa": "آ",
+        "`dh": "ظ", "kh": "خ", "sh": "ش", "dh": "ذ", "gh": "غ", "`h": "ح",
+        "xs": "ص", "th": "ث", "`t": "ط", "`d": "ض", "`a": "ة", "xw": "ؤ",
+        "xy": "ئ", "xx": "ء", "xi": "إ", "xa": "أ", "ai": "ع", "aa": "آ",
         "q": "ق", "f": "ف", "h": "ه", "j": "ج", "d": "د", "s": "س",
         "y": "ي", "b": "ب", "l": "ل", "a": "ا", "t": "ت", "n": "ن",
         "m": "م", "k": "ك", "r": "ر", "e": "ى", "w": "و", "z": "ز"
     };
     
-    // 將 map 的鍵預先排序，從長到短 
+    // 將 map 的鍵預先排序，從長到短
     const sortedKeys = Object.keys(translitMap).sort((a, b) => b.length - a.length);
 
-    // [已修改] 定義觸發候選字視窗的前綴
+    // 定義觸發候選字視窗的前綴
     const candidatePrefixes = ['`', 'x'];
     let activeCandidates = [];
     let composition = { text: '', startIndex: -1 };
-
 
     // 3. 核心轉換與邏輯更新函式
     function updateConversion() {
         const text = latinInput.value;
         let arabicResult = '';
-        let lastCommittedIndex = 0;
         
-        // --- 完整轉譯，忽略當前的組合詞 ---
         let i = 0;
         while (i < text.length) {
-            // 如果進入了正在輸入的組合詞區域，先跳過
             if (i === composition.startIndex) {
                 i += composition.text.length;
                 continue;
@@ -62,10 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         arabicOutput.value = arabicResult;
 
-        // --- 候選字邏輯 ---
-        // 取得游標位置
         const cursorPosition = latinInput.selectionStart;
-        // 尋找游標前最後一個未被轉換的詞
         const lastWord = text.substring(0, cursorPosition).split(/[\s\.,\?!;\(\)]+/).pop();
         
         if (lastWord && candidatePrefixes.includes(lastWord[0])) {
@@ -112,9 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
         latinInput.value = pretext + selectedKey + ' ' + posttext;
         
         hideCandidates();
-        updateConversion(); // 重新觸發轉換
+        updateConversion();
         
-        // 將游標移動到剛插入的詞後面
         latinInput.focus();
         latinInput.selectionStart = latinInput.selectionEnd = (pretext + selectedKey + ' ').length;
     }
@@ -126,21 +111,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeCandidates.length > 0) {
             const keyNum = parseInt(e.key);
             if (keyNum >= 1 && keyNum <= activeCandidates.length) {
-                e.preventDefault(); // 阻止數字 '1', '2' 等被輸入
+                e.preventDefault();
                 commitCandidate(activeCandidates[keyNum - 1]);
             }
-            if (e.key === ' ' || e.key === 'Enter') { // 用空格或Enter選擇第一個
+            if (e.key === ' ' || e.key === 'Enter') {
                 e.preventDefault();
                 commitCandidate(activeCandidates[0]);
             }
-            if (e.key === 'Escape') { // 用Esc取消
+            if (e.key === 'Escape') {
                 e.preventDefault();
                 hideCandidates();
             }
         }
     });
 
-    // 點擊候選字也可以選擇
     candidateWindow.addEventListener('mousedown', (e) => {
         const item = e.target.closest('.candidate-item');
         if (item) {
@@ -148,4 +132,39 @@ document.addEventListener('DOMContentLoaded', () => {
             commitCandidate(item.dataset.key);
         }
     });
+
+    // --- Character Map Logic ---
+
+    const toggleBtn = document.getElementById('toggle-map-btn');
+    const mapContainer = document.getElementById('map-container');
+    const mapTableBody = document.querySelector('#char-map-table tbody');
+
+    function populateCharMap() {
+        mapTableBody.innerHTML = ''; 
+
+        const sortedMap = Object.entries(translitMap).sort((a, b) => {
+            return a[0].localeCompare(b[0]);
+        });
+
+        for (const [latin, arabic] of sortedMap) {
+            const row = document.createElement('tr');
+            
+            const latinCell = document.createElement('td');
+            latinCell.textContent = latin;
+            
+            const arabicCell = document.createElement('td');
+            arabicCell.textContent = arabic;
+            
+            row.appendChild(latinCell);
+            row.appendChild(arabicCell);
+            
+            mapTableBody.appendChild(row);
+        }
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        mapContainer.classList.toggle('hidden');
+    });
+
+    populateCharMap();
 });
