@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرر العربية باللاتينية | Latin-based Arabic IME</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>أداة الكتابة العربية بالحروف اللاتينية</h1>
+        <p>اكتب باللاتينية في الصندوق الأيسر. استخدم v أو x لإظهار قائمة الاختيارات.</p>
+        <p>Type in Latin. Use 'v' or 'x' prefixes to bring up the candidate list.</p>
+        
+        <div class="editor-container">
+            <div class="editor">
+                <label for="latin-input">المدخلات اللاتينية (Latin Input)</label>
+                <div class="input-wrapper">
+                    <textarea id="latin-input" placeholder="e.g., vhmd..."></textarea>
+                    <div id="candidate-window" class="hidden"></div>
+                </div>
+            </div>
+            <div class="editor">
+                <label for="arabic-output">الناتج العربي (Arabic Output)</label>
+                <textarea id="arabic-output" readonly placeholder="مخرجات عربية..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

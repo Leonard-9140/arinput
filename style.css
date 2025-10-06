@@ -1,0 +1,116 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 1000px;
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px
+ 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+h1, p {
+    color: #444;
+}
+
+.editor-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+    font-size: 1rem;
+    text-align: left;
+}
+
+.input-wrapper {
+    position: relative; /* Crucial for positioning the candidate window */
+}
+
+textarea {
+    width: 100%;
+    height: 300px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+#arabic-output {
+    direction: rtl;
+    text-align: right;
+    font-family: 'Noto Sans Arabic', 'Tahoma', sans-serif;
+    background-color: #e9f5f8;
+}
+
+#latin-input {
+    direction: ltr;
+    text-align: left;
+}
+
+/* --- Candidate Window Styles --- */
+#candidate-window {
+    position: absolute;
+    top: 10px; /* Position it slightly inside the textarea */
+    left: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border-radius: 6px;
+    padding: 5px;
+    z-index: 100;
+    font-size: 1.1rem;
+    direction: ltr; /* The window itself is LTR */
+    text-align: left;
+}
+
+#candidate-window.hidden {
+    display: none;
+}
+
+.candidate-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    white-space: nowrap; /* Prevent wrapping */
+    border-radius: 4px;
+}
+
+.candidate-item:hover, .candidate-item.selected {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.candidate-item .num {
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+.candidate-item .arabic {
+    font-family: 'Noto Sans Arabic', 'Tahoma', sans-serif;
+    font-size: 1.2rem;
+    margin: 0 5px;
+}
